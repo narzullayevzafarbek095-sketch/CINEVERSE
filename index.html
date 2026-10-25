@@ -1,0 +1,975 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CineVerse AI — Smart Movie Discovery Platform</title>
+  <meta name="description" content="Discover movies like never before with CineVerse AI. Personalized AI recommendations, deep cinematic discovery, trailers, watchlists, and smart mood-based curation." />
+  
+  <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cine: {
+              bg: '#08090D',
+              card: '#12141C',
+              cardHover: '#181C27',
+              panel: '#161922',
+              border: 'rgba(255, 255, 255, 0.08)',
+              borderHover: 'rgba(139, 92, 246, 0.4)',
+              violet: '#8B5CF6',
+              violetDark: '#7C3AED',
+              cyan: '#00F0FF',
+              blue: '#06B6D4',
+              muted: '#94A3B8',
+              text: '#F8FAFC',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #08090D;
+      color: #F8FAFC;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Outfit', sans-serif;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #08090D;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E2230;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #8B5CF6;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="bg-[#08090D] text-slate-100 antialiased selection:bg-purple-600 selection:text-white min-h-screen">
+  <div id="app"></div>
+
+  <!-- CineVerse AI Standalone Runtime Script (No Vite/Node compilation required) -->
+  <script>
+    // --- Master Curated Movie Dataset ---
+    const MOVIES = [
+      {
+        id: 'dune-2',
+        title: 'Dune: Part Two',
+        tagline: 'Long live the fighters.',
+        overview: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the universe, he endeavors to prevent a terrible future only he can foresee.',
+        posterUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80',
+        backdropUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1920&q=80',
+        releaseYear: 2024,
+        releaseDate: '2024-03-01',
+        rating: 8.7,
+        voteCount: 421000,
+        runtime: 166,
+        genres: ['Sci-Fi', 'Adventure', 'Action', 'Drama'],
+        moods: ['Mind-Bending', 'Excited', 'Emotional', 'Thrilled'],
+        directors: ['Denis Villeneuve'],
+        cast: [
+          { name: 'Timothée Chalamet', character: 'Paul Atreides', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80' },
+          { name: 'Zendaya', character: 'Chani', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80' }
+        ],
+        trailerKey: '8Qn_spdM5Zg',
+        certification: 'PG-13',
+        languages: ['English', 'Fremen'],
+        budget: '$190,000,000',
+        revenue: '$711,844,358',
+        cineVerseScore: 97,
+        type: 'movie',
+        trendingRank: 1,
+        isPopular: true,
+        isTopRated: true
+      },
+      {
+        id: 'oppenheimer',
+        title: 'Oppenheimer',
+        tagline: 'The world forever changes.',
+        overview: 'The story of J. Robert Oppenheimer’s role in the development of the atomic bomb during World War II, examining the political intrigue, moral dread, and psychological reckoning behind the Manhattan Project.',
+        posterUrl: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=800&q=80',
+        backdropUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80',
+        releaseYear: 2023,
+        releaseDate: '2023-07-21',
+        rating: 8.9,
+        voteCount: 680000,
+        runtime: 180,
+        genres: ['Drama', 'History', 'Biography'],
+        moods: ['Curious', 'Emotional', 'Mind-Bending', 'Thrilled'],
+        directors: ['Christopher Nolan'],
+        cast: [
+          { name: 'Cillian Murphy', character: 'J. Robert Oppenheimer', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80' },
+          { name: 'Emily Blunt', character: 'Katherine Oppenheimer', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80' }
+        ],
+        trailerKey: 'uYPbbksJxIg',
+        certification: 'R',
+        languages: ['English', 'German'],
+        budget: '$100,000,000',
+        revenue: '$957,000,000',
+        cineVerseScore: 98,
+        type: 'movie',
+        trendingRank: 2,
+        isPopular: true,
+        isTopRated: true
+      },
+      {
+        id: 'interstellar',
+        title: 'Interstellar',
+        tagline: 'Mankind was born on Earth. It was never meant to die here.',
+        overview: 'When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot, Joseph Cooper, is tasked to pilot a spacecraft, along with a team of researchers, to find a new planet for humans.',
+        posterUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',
+        backdropUrl: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1920&q=80',
+        releaseYear: 2014,
+        releaseDate: '2014-11-07',
+        rating: 8.7,
+        voteCount: 1950000,
+        runtime: 169,
+        genres: ['Sci-Fi', 'Drama', 'Adventure'],
+        moods: ['Mind-Bending', 'Emotional', 'Curious'],
+        directors: ['Christopher Nolan'],
+        cast: [
+          { name: 'Matthew McConaughey', character: 'Cooper', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80' },
+          { name: 'Anne Hathaway', character: 'Brand', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80' }
+        ],
+        trailerKey: 'zSWdZVtXT7E',
+        certification: 'PG-13',
+        languages: ['English'],
+        budget: '$165,000,000',
+        revenue: '$731,000,000',
+        cineVerseScore: 99,
+        type: 'movie',
+        trendingRank: 3,
+        isPopular: true,
+        isTopRated: true
+      },
+      {
+        id: 'spider-verse-2',
+        title: 'Spider-Man: Across the Spider-Verse',
+        tagline: 'It’s how you wear the mask that matters.',
+        overview: 'Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its very existence. When heroes clash on how to handle a threat, Miles must redefine what it means to be a hero.',
+        posterUrl: 'https://images.unsplash.com/photo-1635805737707-575885ab0820?auto=format&fit=crop&w=800&q=80',
+        backdropUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1920&q=80',
+        releaseYear: 2023,
+        releaseDate: '2023-06-02',
+        rating: 8.8,
+        voteCount: 395000,
+        runtime: 140,
+        genres: ['Animation', 'Action', 'Sci-Fi'],
+        moods: ['Excited', 'Emotional', 'Mind-Bending', 'Happy'],
+        directors: ['Joaquim Dos Santos', 'Kemp Powers'],
+        cast: [
+          { name: 'Shameik Moore', character: 'Miles Morales', image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80' },
+          { name: 'Hailee Steinfeld', character: 'Gwen Stacy', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80' }
+        ],
+        trailerKey: 'cqGjhVJWtEg',
+        certification: 'PG',
+        languages: ['English'],
+        budget: '$100,000,000',
+        revenue: '$690,900,000',
+        cineVerseScore: 97,
+        type: 'animation',
+        trendingRank: 4,
+        isPopular: true,
+        isTopRated: true
+      },
+      {
+        id: 'inception',
+        title: 'Inception',
+        tagline: 'Your mind is the scene of the crime.',
+        overview: 'Cobb, a skilled thief who commits corporate espionage by infiltrating subconscious dreams, is offered a chance to regain his old life as payment for a task considered to be impossible: "inception".',
+        posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80',
+        backdropUrl: 'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?auto=format&fit=crop&w=1920&q=80',
+        releaseYear: 2010,
+        releaseDate: '2010-07-16',
+        rating: 8.8,
+        voteCount: 2450000,
+        runtime: 148,
+        genres: ['Sci-Fi', 'Action', 'Thriller'],
+        moods: ['Mind-Bending', 'Excited', 'Curious', 'Thrilled'],
+        directors: ['Christopher Nolan'],
+        cast: [
+          { name: 'Leonardo DiCaprio', character: 'Dom Cobb', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80' }
+        ],
+        trailerKey: 'YoHD9XEInc0',
+        certification: 'PG-13',
+        languages: ['English', 'Japanese'],
+        budget: '$160,000,000',
+        revenue: '$836,836,967',
+        cineVerseScore: 98,
+        type: 'movie',
+        trendingRank: 5,
+        isPopular: true,
+        isTopRated: true
+      },
+      {
+        id: 'the-dark-knight',
+        title: 'The Dark Knight',
+        tagline: 'Why so serious?',
+        overview: 'Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and Harvey Dent, Batman sets out to dismantle Gotham criminal organizations until Joker unleashes reign of chaos.',
+        posterUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80',
+        backdropUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1920&q=80',
+        releaseYear: 2008,
+        releaseDate: '2008-07-18',
+        rating: 9.0,
+        voteCount: 2850000,
+        runtime: 152,
+        genres: ['Action', 'Crime', 'Drama'],
+        moods: ['Thrilled', 'Emotional', 'Excited'],
+        directors: ['Christopher Nolan'],
+        cast: [
+          { name: 'Christian Bale', character: 'Bruce Wayne', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80' },
+          { name: 'Heath Ledger', character: 'Joker', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80' }
+        ],
+        trailerKey: 'EXeTwQWrcwY',
+        certification: 'PG-13',
+        languages: ['English'],
+        budget: '$185,000,000',
+        revenue: '$1,006,000,000',
+        cineVerseScore: 99,
+        type: 'movie',
+        trendingRank: 6,
+        isPopular: true,
+        isTopRated: true
+      },
+      {
+        id: 'everything-everywhere',
+        title: 'Everything Everywhere All at Once',
+        tagline: 'The universe is so much bigger than you realize.',
+        overview: 'An aging Chinese immigrant is swept up in an insane adventure, where she alone can save what’s important to her by connecting with the lives she could have led in other universes.',
+        posterUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
+        backdropUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80',
+        releaseYear: 2022,
+        releaseDate: '2022-03-25',
+        rating: 8.8,
+        voteCount: 512000,
+        runtime: 139,
+        genres: ['Action', 'Adventure', 'Comedy', 'Sci-Fi'],
+        moods: ['Mind-Bending', 'Emotional', 'Happy', 'Excited'],
+        directors: ['Daniel Kwan', 'Daniel Scheinert'],
+        cast: [
+          { name: 'Michelle Yeoh', character: 'Evelyn Wang', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80' }
+        ],
+        trailerKey: 'wxN1T1uxQ2g',
+        certification: 'R',
+        languages: ['English', 'Mandarin'],
+        budget: '$25,000,000',
+        revenue: '$143,400,000',
+        cineVerseScore: 96,
+        type: 'movie',
+        isPopular: true,
+        isTopRated: true
+      },
+      {
+        id: 'arcane-s1',
+        title: 'Arcane: League of Legends',
+        tagline: 'Every legend has a beginning.',
+        overview: 'Set in the utopian region of Piltover and the oppressed underground of Zaun, the story follows the origins of two iconic League champions-and the power that will tear them apart.',
+        posterUrl: 'https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=800&q=80',
+        backdropUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80',
+        releaseYear: 2021,
+        releaseDate: '2021-11-06',
+        rating: 9.0,
+        voteCount: 280000,
+        runtime: 42,
+        genres: ['Animation', 'Action', 'Sci-Fi', 'Drama'],
+        moods: ['Excited', 'Emotional', 'Thrilled'],
+        directors: ['Pascal Charrue', 'Arnaud Delord'],
+        cast: [
+          { name: 'Hailee Steinfeld', character: 'Vi', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80' }
+        ],
+        trailerKey: 'fXmAurh012s',
+        certification: 'TV-14',
+        languages: ['English'],
+        cineVerseScore: 99,
+        type: 'series',
+        isPopular: true,
+        isTopRated: true
+      }
+    ];
+
+    // --- State Storage ---
+    function getStoredWatchlist() {
+      try {
+        const d = localStorage.getItem('cineverse_watchlist');
+        return d ? JSON.parse(d) : [
+          { movieId: 'dune-2', movie: MOVIES[0], watched: true, personalRating: 10 },
+          { movieId: 'oppenheimer', movie: MOVIES[1], watched: true, personalRating: 9 }
+        ];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveStoredWatchlist(list) {
+      localStorage.setItem('cineverse_watchlist', JSON.stringify(list));
+    }
+
+    // --- App State ---
+    let state = {
+      view: 'home', // 'home' | 'discover' | 'trending' | 'watchlist' | 'profile' | 'admin'
+      searchQuery: '',
+      selectedGenre: 'All',
+      watchlist: getStoredWatchlist(),
+      selectedMovie: null,
+      trailerMovie: null,
+      aiFinderOpen: false,
+      settingsOpen: false,
+      toastMsg: null,
+      adminAuth: false,
+      adminPassInput: '',
+      aiMood: 'Mind-Bending',
+      aiResults: null
+    };
+
+    function setState(patch) {
+      state = { ...state, ...patch };
+      render();
+    }
+
+    function showToast(text) {
+      setState({ toastMsg: text });
+      setTimeout(() => {
+        if (state.toastMsg === text) setState({ toastMsg: null });
+      }, 3500);
+    }
+
+    function toggleWatchlist(movie) {
+      const exists = state.watchlist.some(w => w.movieId === movie.id);
+      let next;
+      if (exists) {
+        next = state.watchlist.filter(w => w.movieId !== movie.id);
+        saveStoredWatchlist(next);
+        setState({ watchlist: next });
+        showToast(`Removed "${movie.title}" from Watchlist`);
+      } else {
+        next = [{ movieId: movie.id, movie, watched: false }, ...state.watchlist];
+        saveStoredWatchlist(next);
+        setState({ watchlist: next });
+        showToast(`Added "${movie.title}" to Watchlist! ⭐`);
+      }
+    }
+
+    function toggleWatched(movieId) {
+      const next = state.watchlist.map(item => {
+        if (item.movieId === movieId) {
+          return { ...item, watched: !item.watched };
+        }
+        return item;
+      });
+      saveStoredWatchlist(next);
+      setState({ watchlist: next });
+    }
+
+    // --- Template Renders ---
+    function render() {
+      const app = document.getElementById('app');
+      if (!app) return;
+
+      const heroMovie = MOVIES[0];
+      const inHeroList = state.watchlist.some(w => w.movieId === heroMovie.id);
+
+      app.innerHTML = `
+        <div class="min-h-screen bg-[#08090D] text-slate-100 flex flex-col font-sans">
+          <!-- Top Broadcast Notification Banner -->
+          <div class="bg-gradient-to-r from-purple-900/90 via-indigo-900/90 to-cyan-900/90 border-b border-purple-500/20 px-4 py-2 text-xs text-white flex items-center justify-center gap-2 shadow-lg sticky top-0 z-50">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            <span class="font-medium tracking-wide">CineVerse AI Live: Smart Discovery & Trailer Playback Active</span>
+          </div>
+
+          <!-- Navigation Bar -->
+          <header class="sticky top-8 z-40 w-full bg-[#08090D]/90 backdrop-blur-xl border-b border-white/5">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+              <!-- Logo -->
+              <div onclick="window.navTo('home')" class="flex items-center gap-3 cursor-pointer group">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-cyan-400 p-[1px] shadow-lg shadow-purple-600/30">
+                  <div class="w-full h-full bg-[#08090D] rounded-2xl flex items-center justify-center text-purple-400 font-bold text-lg">
+                    🎬
+                  </div>
+                </div>
+                <div>
+                  <span class="text-xl font-black font-display tracking-tight text-white flex items-center gap-1.5">
+                    CINEVERSE <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 text-xs px-1.5 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">AI</span>
+                  </span>
+                  <span class="hidden sm:block text-[10px] text-slate-400 uppercase tracking-wider">Smart Movie Discovery</span>
+                </div>
+              </div>
+
+              <!-- Nav Links -->
+              <nav class="hidden md:flex items-center gap-2">
+                <button onclick="window.navTo('home')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${state.view === 'home' ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30' : 'text-slate-300 hover:text-white'}">Home</button>
+                <button onclick="window.navTo('discover')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${state.view === 'discover' ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30' : 'text-slate-300 hover:text-white'}">Discover</button>
+                <button onclick="window.navTo('trending')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${state.view === 'trending' ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30' : 'text-slate-300 hover:text-white'}">Trending</button>
+                <button onclick="window.navTo('watchlist')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${state.view === 'watchlist' ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30' : 'text-slate-300 hover:text-white'}">Watchlist (${state.watchlist.length})</button>
+              </nav>
+
+              <!-- Actions -->
+              <div class="flex items-center gap-2">
+                <button
+                  onclick="window.openAiModal()"
+                  class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:opacity-95 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-all hover:scale-105 active:scale-95"
+                >
+                  <span>✨</span>
+                  <span>AI Movie Finder</span>
+                </button>
+
+                <button onclick="window.navTo('profile')" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300" title="User Profile">👤</button>
+                <button onclick="window.openSettingsModal()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300" title="Settings">⚙️</button>
+                <button onclick="window.navTo('admin')" class="p-2 rounded-xl ${state.view === 'admin' ? 'bg-purple-600 text-white' : 'bg-white/5 hover:bg-white/10 text-slate-400'}" title="Admin Control Center">🛡️</button>
+              </div>
+            </div>
+          </header>
+
+          <!-- Main Content -->
+          <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-10">
+            ${renderView()}
+          </main>
+
+          <!-- Modals & Overlays -->
+          ${renderMovieDetailsModal()}
+          ${renderTrailerModal()}
+          ${renderAiFinderModal()}
+          ${renderSettingsModal()}
+
+          <!-- Floating Toast -->
+          ${state.toastMsg ? `
+            <div class="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl bg-[#12141C] border border-purple-500/40 text-white text-xs font-semibold shadow-2xl animate-fade-in flex items-center gap-2">
+              <span class="text-emerald-400">✓</span>
+              <span>${state.toastMsg}</span>
+            </div>
+          ` : ''}
+
+          <!-- Footer -->
+          <footer class="border-t border-white/5 bg-[#06070A] py-12 mt-20 text-center text-xs text-slate-500">
+            <p class="font-display text-slate-400 text-sm font-semibold">CineVerse AI — Cinematic Discovery Engine</p>
+            <p class="mt-1">© 2026 CineVerse AI. Designed with cinematic precision.</p>
+          </footer>
+        </div>
+      `;
+    }
+
+    function renderView() {
+      if (state.view === 'home') {
+        const hero = MOVIES[0];
+        const inWatch = state.watchlist.some(w => w.movieId === hero.id);
+        return `
+          <div class="space-y-12 animate-fade-in">
+            <!-- Hero Spotlight -->
+            <div class="relative w-full min-h-[520px] sm:min-h-[600px] flex items-end pb-12 overflow-hidden rounded-3xl border border-white/5 shadow-2xl">
+              <img src="${hero.backdropUrl}" alt="${hero.title}" class="absolute inset-0 w-full h-full object-cover opacity-75 scale-105" />
+              <div class="absolute inset-0 bg-gradient-to-t from-[#08090D] via-[#08090D]/70 to-transparent"></div>
+              <div class="absolute inset-0 bg-gradient-to-r from-[#08090D] via-[#08090D]/80 to-transparent w-full md:w-3/4"></div>
+
+              <div class="relative z-10 px-6 sm:px-12 max-w-3xl space-y-4">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="px-3 py-1 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-xs shadow-lg">FEATURED SPOTLIGHT</span>
+                  <span class="px-2.5 py-1 rounded-full bg-black/60 border border-white/10 text-amber-400 font-mono text-xs font-bold">⭐ ${hero.rating} IMDb</span>
+                  <span class="px-2.5 py-1 rounded-full bg-white/10 text-slate-300 text-xs">${hero.releaseYear}</span>
+                  <span class="px-2.5 py-1 rounded-full bg-white/10 text-slate-300 text-xs">${hero.runtime} min</span>
+                  <span class="px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-mono">${hero.cineVerseScore}% AI Score</span>
+                </div>
+
+                <h1 class="text-4xl sm:text-6xl font-black font-display text-white leading-tight">${hero.title}</h1>
+                <p class="text-sm sm:text-base text-slate-300 leading-relaxed line-clamp-3">${hero.overview}</p>
+
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                  <button
+                    onclick="window.playTrailer('${hero.id}')"
+                    class="flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-sm shadow-xl shadow-purple-600/30 transition-all hover:scale-105"
+                  >
+                    ▶ Watch Trailer
+                  </button>
+                  <button
+                    onclick="window.viewMovieDetails('${hero.id}')"
+                    class="flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm border border-white/10 transition-all"
+                  >
+                    Explore Movie
+                  </button>
+                  <button
+                    onclick="window.toggleWatch('${hero.id}')"
+                    class="flex items-center gap-2 px-4 py-3 rounded-xl bg-black/40 hover:bg-black/60 text-slate-300 border border-white/10 text-sm font-medium transition-all"
+                  >
+                    ${inWatch ? '✓ In Watchlist' : '+ Add to Watchlist'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI Recommendation Teaser -->
+            <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#141624] via-[#1A1D30] to-[#12141C] border border-purple-500/20 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+              <div class="space-y-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 text-xs font-semibold">
+                  ✨ Neural Film Matcher
+                </span>
+                <h2 class="text-2xl font-bold font-display text-white">Not sure what to watch tonight?</h2>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-xl">
+                  Answer 5 quick vibe questions—mood, duration, genres, and release era—and our AI engine will synthesize the perfect movie match with a customized rationale.
+                </p>
+              </div>
+              <button
+                onclick="window.openAiModal()"
+                class="shrink-0 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:opacity-95 text-white font-bold text-sm shadow-xl shadow-purple-600/30 transition-all hover:scale-105"
+              >
+                Launch AI Movie Finder →
+              </button>
+            </div>
+
+            <!-- Movie Catalog Carousel Grid -->
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold font-display text-white flex items-center gap-2">
+                  🔥 Trending Cinema
+                </h2>
+                <button onclick="window.navTo('trending')" class="text-xs text-purple-400 font-semibold hover:underline">View All</button>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                ${MOVIES.map(renderMovieCard).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (state.view === 'discover') {
+        const filtered = MOVIES.filter(m => {
+          const matchQ = !state.searchQuery || m.title.toLowerCase().includes(state.searchQuery.toLowerCase()) || m.directors.some(d => d.toLowerCase().includes(state.searchQuery.toLowerCase()));
+          const matchG = state.selectedGenre === 'All' || m.genres.includes(state.selectedGenre);
+          return matchQ && matchG;
+        });
+
+        return `
+          <div class="space-y-8 animate-fade-in pb-16">
+            <div>
+              <h1 class="text-3xl font-black font-display text-white">Explore & Discover</h1>
+              <p class="text-xs sm:text-sm text-slate-400 mt-1">Multi-vector search across genres, release years, and directors.</p>
+            </div>
+
+            <div class="space-y-4">
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+                <input
+                  type="text"
+                  value="${state.searchQuery}"
+                  oninput="window.setSearch(this.value)"
+                  placeholder="Search by title, director, or character..."
+                  class="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[#12141C] border border-white/10 text-white text-sm focus:outline-none focus:border-purple-500"
+                />
+              </div>
+
+              <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                ${['All', 'Sci-Fi', 'Action', 'Drama', 'Adventure', 'Animation', 'Comedy', 'Thriller'].map(g => `
+                  <button
+                    onclick="window.setGenre('${g}')"
+                    class="px-3.5 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all ${state.selectedGenre === g ? 'bg-purple-600 text-white shadow-md' : 'bg-[#161922] text-slate-400 hover:text-white border border-white/5'}"
+                  >
+                    ${g}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              ${filtered.length > 0 ? filtered.map(renderMovieCard).join('') : `
+                <div class="col-span-full py-16 text-center text-slate-400 space-y-2">
+                  <p class="text-lg font-bold text-white">No movies found</p>
+                  <p class="text-xs">Try searching another title or resetting your genre filter.</p>
+                  <button onclick="window.setGenre('All'); window.setSearch('');" class="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-semibold mt-2">Reset Filters</button>
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      }
+
+      if (state.view === 'trending') {
+        return `
+          <div class="space-y-8 animate-fade-in pb-16">
+            <div>
+              <h1 class="text-3xl font-black font-display text-white">Trending Movies Heatmap</h1>
+              <p class="text-xs sm:text-sm text-slate-400 mt-1">Global charts ranked by streaming momentum, theatrical returns, and viewer ratings.</p>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              ${MOVIES.map(renderMovieCard).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      if (state.view === 'watchlist') {
+        return `
+          <div class="space-y-6 animate-fade-in pb-16">
+            <div>
+              <h1 class="text-3xl font-black font-display text-white">Personal Watchlist</h1>
+              <p class="text-xs sm:text-sm text-slate-400 mt-1">Manage your saved films and track watched screenings.</p>
+            </div>
+
+            ${state.watchlist.length === 0 ? `
+              <div class="py-16 text-center text-slate-400 space-y-3">
+                <p class="text-lg font-bold text-white">Your watchlist is empty</p>
+                <p class="text-xs">Explore movies or use the AI Movie Finder to discover titles!</p>
+                <button onclick="window.navTo('home')" class="px-5 py-2.5 rounded-xl bg-purple-600 text-white text-xs font-bold">Discover Movies</button>
+              </div>
+            ` : `
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                ${state.watchlist.map(item => `
+                  <div class="p-4 rounded-2xl bg-[#12141C] border border-white/5 flex gap-4">
+                    <img src="${item.movie.posterUrl}" alt="${item.movie.title}" class="w-20 aspect-[2/3] object-cover rounded-xl shrink-0 cursor-pointer" onclick="window.viewMovieDetails('${item.movieId}')" />
+                    <div class="flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 onclick="window.viewMovieDetails('${item.movieId}')" class="text-sm font-bold text-white hover:text-purple-400 cursor-pointer">${item.movie.title}</h3>
+                        <p class="text-[11px] text-slate-400 mt-0.5">${item.movie.releaseYear} • ⭐ ${item.movie.rating}</p>
+                      </div>
+                      <div class="flex items-center justify-between pt-2 border-t border-white/5">
+                        <button
+                          onclick="window.toggleWatchedStatus('${item.movieId}')"
+                          class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 border ${item.watched ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-white/5 text-slate-400'}"
+                        >
+                          ${item.watched ? '✓ Watched' : 'Mark Watched'}
+                        </button>
+                        <button onclick="window.toggleWatch('${item.movieId}')" class="text-xs text-rose-400 hover:underline">Remove</button>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+        `;
+      }
+
+      if (state.view === 'profile') {
+        const watchedCount = state.watchlist.filter(w => w.watched).length;
+        return `
+          <div class="space-y-6 animate-fade-in pb-16 max-w-4xl mx-auto">
+            <div class="p-6 sm:p-8 rounded-3xl bg-[#12141C] border border-white/5 flex items-center gap-5">
+              <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center text-white text-3xl shadow-xl">
+                👤
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <h2 class="text-2xl font-bold font-display text-white">Alex Mercer</h2>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-semibold">LOCAL DEMO</span>
+                </div>
+                <p class="text-xs text-slate-400">Cinema buff & IMAX enthusiast • Favorite genres: Sci-Fi, Psychological Drama</p>
+                <div class="flex items-center gap-4 text-xs font-mono text-purple-300 pt-2">
+                  <span>${state.watchlist.length} Saved</span>
+                  <span>•</span>
+                  <span>${watchedCount} Completed</span>
+                  <span>•</span>
+                  <span>14h Screen Time</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (state.view === 'admin') {
+        return `
+          <div class="space-y-6 animate-fade-in pb-16 max-w-4xl mx-auto">
+            <div class="p-6 rounded-3xl bg-[#12141C] border border-white/5 space-y-4">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">🛡️</span>
+                <div>
+                  <h2 class="text-xl font-bold font-display text-white">Administrator Control Center</h2>
+                  <p class="text-xs text-slate-400">Passcode protection & live API telemetry</p>
+                </div>
+              </div>
+
+              ${!state.adminAuth ? `
+                <div class="space-y-3 pt-2">
+                  <input
+                    type="password"
+                    id="adminPassInput"
+                    placeholder="Enter admin passcode (cineverse2026)"
+                    class="w-full px-3.5 py-2.5 rounded-xl bg-[#0E1017] border border-white/10 text-white text-xs"
+                  />
+                  <button
+                    onclick="window.authAdmin()"
+                    class="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-lg"
+                  >
+                    Authenticate Admin Session
+                  </button>
+                  <p class="text-[11px] text-slate-500 text-center">Default passcode: <code class="text-purple-300">cineverse2026</code></p>
+                </div>
+              ` : `
+                <div class="space-y-4 pt-4 border-t border-white/5">
+                  <div class="grid grid-cols-3 gap-3">
+                    <div class="p-4 rounded-xl bg-[#161922]"><p class="text-xs text-slate-400">Catalog Size</p><p class="text-xl font-bold text-purple-400">${MOVIES.length} Verified Master Films</p></div>
+                    <div class="p-4 rounded-xl bg-[#161922]"><p class="text-xs text-slate-400">AI Match Runs</p><p class="text-xl font-bold text-cyan-400">830 Syntheses</p></div>
+                    <div class="p-4 rounded-xl bg-[#161922]"><p class="text-xs text-slate-400">Status</p><p class="text-xl font-bold text-emerald-400">100% Operational</p></div>
+                  </div>
+                  <p class="text-xs text-emerald-400 flex items-center gap-1.5">✓ Administrator session authenticated.</p>
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      }
+
+      return '';
+    }
+
+    function renderMovieCard(movie) {
+      const inWatch = state.watchlist.some(w => w.movieId === movie.id);
+      return `
+        <div
+          onclick="window.viewMovieDetails('${movie.id}')"
+          class="group bg-[#12141C] border border-white/5 hover:border-purple-500/40 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1.5 shadow-xl select-none"
+        >
+          <div class="relative aspect-[2/3] overflow-hidden bg-[#161922]">
+            <img src="${movie.posterUrl}" alt="${movie.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <div class="absolute top-2.5 inset-x-2.5 flex justify-between items-center z-10">
+              <span class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-black/60 backdrop-blur-md text-amber-400 font-mono text-xs font-bold">
+                ⭐ ${movie.rating}
+              </span>
+              <button
+                onclick="event.stopPropagation(); window.toggleWatch('${movie.id}')"
+                class="p-1.5 rounded-lg ${inWatch ? 'bg-purple-600 text-white' : 'bg-black/60 text-white hover:bg-purple-600'} transition-colors"
+              >
+                ${inWatch ? '✓' : '🔖'}
+              </button>
+            </div>
+            <span class="absolute bottom-2.5 left-2.5 text-[10px] font-semibold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              ${movie.cineVerseScore}% AI Score
+            </span>
+          </div>
+          <div class="p-3">
+            <h3 class="font-semibold text-sm text-white truncate group-hover:text-purple-400 transition-colors">${movie.title}</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">${movie.releaseYear} • ${movie.genres[0]}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMovieDetailsModal() {
+      if (!state.selectedMovie) return '';
+      const m = state.selectedMovie;
+      const inWatch = state.watchlist.some(w => w.movieId === m.id);
+
+      return `
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div class="relative w-full max-w-3xl bg-[#12141C] border border-white/10 rounded-3xl overflow-hidden shadow-2xl my-auto">
+            <button onclick="window.closeMovieDetails()" class="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/60 text-white hover:bg-black">✕</button>
+            
+            <div class="relative h-64 bg-black">
+              <img src="${m.backdropUrl}" alt="${m.title}" class="w-full h-full object-cover opacity-75" />
+              <div class="absolute inset-0 bg-gradient-to-t from-[#12141C] to-transparent"></div>
+            </div>
+
+            <div class="p-6 -mt-16 relative z-10 space-y-4">
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-2.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">${m.releaseYear}</span>
+                <span class="text-xs px-2.5 py-0.5 rounded bg-white/10 text-slate-300">${m.certification}</span>
+                <span class="text-xs px-2.5 py-0.5 rounded bg-white/10 text-slate-300">${m.runtime} min</span>
+                <span class="text-xs px-2.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">${m.cineVerseScore}% CineVerse Score</span>
+              </div>
+
+              <h2 class="text-3xl font-black font-display text-white">${m.title}</h2>
+              <p class="text-xs text-purple-300 font-medium italic">"${m.tagline}"</p>
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${m.overview}</p>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-[#161922] text-xs">
+                <div><span class="text-slate-400">Director:</span> <p class="font-bold text-white">${m.directors.join(', ')}</p></div>
+                <div><span class="text-slate-400">IMDb Score:</span> <p class="font-bold text-amber-400">⭐ ${m.rating} / 10</p></div>
+                <div><span class="text-slate-400">Genres:</span> <p class="font-bold text-white">${m.genres.join(', ')}</p></div>
+              </div>
+
+              <div class="flex gap-3 pt-2">
+                <button
+                  onclick="window.playTrailer('${m.id}')"
+                  class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-purple-600/30"
+                >
+                  ▶ Watch Trailer
+                </button>
+                <button
+                  onclick="window.toggleWatch('${m.id}')"
+                  class="px-4 py-2.5 rounded-xl ${inWatch ? 'bg-purple-900/60 text-purple-200 border-purple-500' : 'bg-white/10 text-white'} text-xs font-medium border border-white/10"
+                >
+                  ${inWatch ? '✓ In Watchlist' : '+ Add to Watchlist'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTrailerModal() {
+      if (!state.trailerMovie) return '';
+      const m = state.trailerMovie;
+      return `
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in">
+          <div class="w-full max-w-4xl bg-[#12141C] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="flex justify-between items-center px-4 py-3 border-b border-white/10 bg-[#161922]">
+              <span class="text-sm font-bold text-white">${m.title} — Official Trailer</span>
+              <button onclick="window.closeTrailer()" class="p-1 rounded text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div class="aspect-video bg-black">
+              <iframe
+                src="https://www.youtube-nocookie.com/embed/${m.trailerKey}?autoplay=1&rel=0"
+                title="${m.title}"
+                class="w-full h-full border-0"
+                allowfullscreen
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAiFinderModal() {
+      if (!state.aiFinderOpen) return '';
+      return `
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+          <div class="w-full max-w-2xl bg-[#12141C] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center pb-3 border-b border-white/10">
+              <div class="flex items-center gap-2">
+                <span class="text-cyan-400">✨</span>
+                <h3 class="text-lg font-bold font-display text-white">Find Your Next Movie (AI Matcher)</h3>
+              </div>
+              <button onclick="window.closeAiModal()" class="p-1 rounded text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold uppercase text-purple-400 mb-2">1. Select Your Current Vibe / Mood</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  ${['Mind-Bending', 'Excited', 'Relaxed', 'Curious', 'Emotional', 'Thrilled'].map(mood => `
+                    <button
+                      onclick="window.selectAiMood('${mood}')"
+                      class="p-3 rounded-xl border text-left text-xs font-semibold transition-all ${state.aiMood === mood ? 'bg-[#1D202E] border-purple-500 text-purple-300 ring-1 ring-purple-500' : 'bg-[#161922] border-white/5 text-slate-300 hover:border-white/20'}"
+                    >
+                      ${mood}
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase text-purple-400 mb-2">2. Minimum IMDb Rating</label>
+                <div class="flex items-center gap-3">
+                  <input type="range" min="7.0" max="9.0" step="0.5" value="8.0" class="w-full accent-purple-500" />
+                  <span class="font-mono text-xs font-bold text-amber-400">8.0+</span>
+                </div>
+              </div>
+
+              <div class="pt-2">
+                <button
+                  onclick="window.synthesizeAiRecommendation()"
+                  class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 hover:scale-[1.01] transition-all"
+                >
+                  Synthesize Best Recommendation →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSettingsModal() {
+      if (!state.settingsOpen) return '';
+      return `
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+          <div class="w-full max-w-md bg-[#12141C] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-white/5">
+              <h3 class="text-lg font-bold font-display text-white">Platform Settings</h3>
+              <button onclick="window.closeSettingsModal()" class="p-1 rounded text-slate-400 hover:text-white">✕</button>
+            </div>
+            <p class="text-xs text-slate-400">CineVerse AI is operating in <strong>Curated Master Mode</strong> with 100% offline verified movie posters, trailers, and metadata.</p>
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-slate-300">TMDB API Key (Optional)</label>
+              <input type="text" placeholder="Paste TMDB v3 API Key" class="w-full px-3 py-2 rounded-xl bg-[#0E1017] border border-white/10 text-white text-xs" />
+            </div>
+            <div class="pt-2 flex justify-end">
+              <button onclick="window.closeSettingsModal(); window.showToastMsg('Settings saved!');" class="px-5 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold">Save</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- Global Window Handler Attachments ---
+    window.navTo = (v) => { setState({ view: v }); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    window.setGenre = (g) => setState({ selectedGenre: g });
+    window.setSearch = (q) => setState({ searchQuery: q });
+    window.toggleWatch = (id) => {
+      const movie = MOVIES.find(m => m.id === id);
+      if (movie) toggleWatchlist(movie);
+    };
+    window.toggleWatchedStatus = (id) => toggleWatched(id);
+    window.viewMovieDetails = (id) => {
+      const m = MOVIES.find(movie => movie.id === id);
+      if (m) setState({ selectedMovie: m });
+    };
+    window.closeMovieDetails = () => setState({ selectedMovie: null });
+    window.playTrailer = (id) => {
+      const m = MOVIES.find(movie => movie.id === id);
+      if (m) setState({ trailerMovie: m });
+    };
+    window.closeTrailer = () => setState({ trailerMovie: null });
+    window.openAiModal = () => setState({ aiFinderOpen: true });
+    window.closeAiModal = () => setState({ aiFinderOpen: false });
+    window.selectAiMood = (mood) => setState({ aiMood: mood });
+    window.synthesizeAiRecommendation = () => {
+      const match = MOVIES.find(m => m.moods.includes(state.aiMood)) || MOVIES[0];
+      setState({ aiFinderOpen: false, selectedMovie: match });
+      showToast(`AI Match: ${match.title} (${match.cineVerseScore}% Synergy)!`);
+    };
+    window.openSettingsModal = () => setState({ settingsOpen: true });
+    window.closeSettingsModal = () => setState({ settingsOpen: false });
+    window.showToastMsg = (txt) => showToast(txt);
+    window.authAdmin = () => {
+      const input = document.getElementById('adminPassInput');
+      if (input && input.value === 'cineverse2026') {
+        setState({ adminAuth: true });
+        showToast('Admin session authenticated!');
+      } else {
+        alert('Invalid passcode. Default passcode is: cineverse2026');
+      }
+    };
+
+    // Initial render call
+    render();
+  </script>
+</body>
+</html>
